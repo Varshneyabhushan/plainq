@@ -16,7 +16,7 @@ export default class QueueItem {
   onResume: queueEventCallback;
   onStop: queueEventCallback;
   isComplete: boolean;
-  markCompleteCallback: Function;
+  __markCompleteCallback: Function;
 
   start(): Error {
     if (!this.onStart) return new Error("cannot be started");
@@ -66,12 +66,12 @@ export default class QueueItem {
   }
 
   onComplete(callback: Function): void {
-    this.markCompleteCallback = callback;
+    this.__markCompleteCallback = callback;
   }
 
   //should be called by implimenter
   markComplete() : void {
-    if(this.markCompleteCallback)
-      return this.markCompleteCallback()
+    if(this.__markCompleteCallback)
+      return this.__markCompleteCallback()
   }
 }
