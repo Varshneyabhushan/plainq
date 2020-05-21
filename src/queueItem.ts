@@ -1,4 +1,4 @@
-export enum queueItemState {
+export enum status {
   playing,
   stopped,
   paused,
@@ -9,7 +9,7 @@ export interface queueEventCallback {
 }
 
 export default class QueueItem {
-  state: queueItemState;
+  status: status;
 
   onStart: queueEventCallback;
   onPause: queueEventCallback;
@@ -22,46 +22,43 @@ export default class QueueItem {
     if (!this.onStart) return new Error("cannot be started");
 
     let result = this.onStart();
-    if (result == null) this.state = queueItemState.playing;
+    if (result == null) this.status = status.playing;
     return result;
   }
 
   pause(): Error {
     if (!this.onPause) return new Error("cannot be paused");
 
-    if (this.state === queueItemState.stopped)
+    if (this.status === status.stopped)
       return new Error("stopped item cannot be paused");
 
-    if (this.state === queueItemState.paused)
-      return new Error("already stopped");
+    if (this.status === status.paused) return new Error("already stopped");
 
     let result = this.onPause();
-    if (result == null) this.state = queueItemState.paused;
+    if (result == null) this.status = status.paused;
     return result;
   }
 
   resume(): Error {
     if (!this.onResume) return new Error("cannot be resumed");
 
-    if (this.state === queueItemState.playing)
-      return new Error("already playing");
+    if (this.status === status.playing) return new Error("already playing");
 
-    if (this.state === queueItemState.stopped)
+    if (this.status === status.stopped)
       return new Error("stopped item cannot be resumed");
 
     let result = this.onResume();
-    if (result == null) this.state = queueItemState.playing;
+    if (result == null) this.status = status.playing;
     return result;
   }
 
   stop(): Error {
     if (!this.onStop) return new Error("cannot be stopped");
 
-    if (this.state === queueItemState.stopped)
-      return new Error("already stopped");
+    if (this.status === status.stopped) return new Error("already stopped");
 
     let result = this.onStop();
-    if (result == null) this.state = queueItemState.stopped;
+    if (result == null) this.status = status.stopped;
     return result;
   }
 
@@ -70,8 +67,7 @@ export default class QueueItem {
   }
 
   //should be called by implimenter
-  markComplete() : void {
-    if(this.__markCompleteCallback)
-      return this.__markCompleteCallback()
+  markComplete(): void {
+    if (this.__markCompleteCallback) return this.__markCompleteCallback();
   }
 }
