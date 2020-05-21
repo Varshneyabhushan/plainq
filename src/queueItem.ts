@@ -16,8 +16,8 @@ export default class QueueItem {
   private _onStopCallback: Function;
   private pausable: boolean;
 
-  constructor(pausable: boolean) {
-    this.pausable = pausable;
+  constructor(pausable?: boolean) {
+    this.pausable = pausable ?? true;
   }
 
   start(): Error {
