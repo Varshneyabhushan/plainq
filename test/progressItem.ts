@@ -2,12 +2,8 @@ import QueueItem from "../src/queueItem";
 
 //progress for 10s and stops
 export default class ProgressItem extends QueueItem {
-  progress: number;
+  progress: number = 0;
   interval: NodeJS.Timeout;
-  constructor() {
-    super();
-    this.progress = 0;
-  }
 
   protected toStart(): Error {
     this.interval = setInterval(() => {

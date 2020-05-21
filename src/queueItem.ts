@@ -2,16 +2,12 @@ export enum status {
   playing,
   stopped,
   paused,
-}
-
-export interface queueEventCallback {
-  (): Error;
+  complete,
 }
 
 export default class QueueItem {
   status: status;
 
-  private _isComplete: boolean;
   private _markCompleteCallback: Function;
   private _onStopCallback: Function;
   private pausable: boolean;
@@ -24,7 +20,6 @@ export default class QueueItem {
     let result = this.toStart();
     if (result == null) {
       this.status = status.playing;
-      this._isComplete = false;
     }
     return result;
   }
@@ -35,7 +30,9 @@ export default class QueueItem {
     if (this.status === status.stopped)
       return new Error("stopped item cannot be paused");
 
-    if (this.status === status.paused) return new Error("already stopped");
+    if (this.status === status.paused) return new Error("already paused");
+
+    if (this.status === status.complete) return new Error("already complete");
 
     let result = this.toPause();
     if (result == null) this.status = status.paused;
@@ -50,6 +47,8 @@ export default class QueueItem {
     if (this.status === status.stopped)
       return new Error("stopped item cannot be resumed");
 
+    if (this.status === status.complete) return new Error("already complete");
+
     let result = this.toResume();
     if (result == null) this.status = status.playing;
     return result;
@@ -57,6 +56,8 @@ export default class QueueItem {
 
   stop(interrupted?: boolean): Error {
     if (this.status === status.stopped) return new Error("already stopped");
+
+    if (this.status === status.complete) return new Error("already complete");
 
     let result = this.toStop();
     if (result == null) {
@@ -89,12 +90,11 @@ export default class QueueItem {
   }
 
   protected markComplete(): void {
-    this._isComplete = true;
-    this.status = status.stopped;
+    this.status = status.complete;
     if (this._markCompleteCallback) return this._markCompleteCallback();
   }
 
   isComplete(): boolean {
-    return this._isComplete;
+    return this.status === status.complete;
   }
 }
