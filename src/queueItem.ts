@@ -1,8 +1,8 @@
 export enum status {
-  playing,
-  stopped,
-  paused,
-  complete,
+  playing = "playing",
+  stopped = "stopped",
+  paused = "paused",
+  complete = "complete",
 }
 
 export default class QueueItem {
