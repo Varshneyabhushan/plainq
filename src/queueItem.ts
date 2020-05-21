@@ -11,23 +11,25 @@ export interface queueEventCallback {
 export default class QueueItem {
   status: status;
 
-  onStart: queueEventCallback;
-  onPause: queueEventCallback;
-  onResume: queueEventCallback;
-  onStop: queueEventCallback;
-  isComplete: boolean;
-  __markCompleteCallback: Function;
+  private _isComplete: boolean;
+  private _markCompleteCallback: Function;
+  private pausable: boolean;
+
+  constructor(pausable: boolean) {
+    this.pausable = pausable;
+  }
 
   start(): Error {
-    if (!this.onStart) return new Error("cannot be started");
-
     let result = this.onStart();
-    if (result == null) this.status = status.playing;
+    if (result == null) {
+      this.status = status.playing;
+      this._isComplete = false;
+    }
     return result;
   }
 
   pause(): Error {
-    if (!this.onPause) return new Error("cannot be paused");
+    if (!this.pausable) return new Error("cannot be paused");
 
     if (this.status === status.stopped)
       return new Error("stopped item cannot be paused");
@@ -40,7 +42,7 @@ export default class QueueItem {
   }
 
   resume(): Error {
-    if (!this.onResume) return new Error("cannot be resumed");
+    if (!this.pausable) return new Error("cannot be resumed");
 
     if (this.status === status.playing) return new Error("already playing");
 
@@ -53,8 +55,6 @@ export default class QueueItem {
   }
 
   stop(): Error {
-    if (!this.onStop) return new Error("cannot be stopped");
-
     if (this.status === status.stopped) return new Error("already stopped");
 
     let result = this.onStop();
@@ -63,11 +63,30 @@ export default class QueueItem {
   }
 
   onComplete(callback: Function): void {
-    this.__markCompleteCallback = callback;
+    this._markCompleteCallback = callback;
   }
 
   //should be called by implimenter
-  markComplete(): void {
-    if (this.__markCompleteCallback) return this.__markCompleteCallback();
+  protected onStart(): Error {
+    return null;
+  }
+  protected onPause(): Error {
+    return null;
+  }
+  protected onResume(): Error {
+    return null;
+  }
+  protected onStop(): Error {
+    return null;
+  }
+
+  protected markComplete(): void {
+    this._isComplete = true;
+    this.status = status.stopped;
+    if (this._markCompleteCallback) return this._markCompleteCallback();
+  }
+
+  isComplete(): boolean {
+    return this._isComplete;
   }
 }
