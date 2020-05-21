@@ -20,7 +20,7 @@ export default class QueueItem {
   }
 
   start(): Error {
-    let result = this.onStart();
+    let result = this.toStart();
     if (result == null) {
       this.status = status.playing;
       this._isComplete = false;
@@ -36,7 +36,7 @@ export default class QueueItem {
 
     if (this.status === status.paused) return new Error("already stopped");
 
-    let result = this.onPause();
+    let result = this.toPause();
     if (result == null) this.status = status.paused;
     return result;
   }
@@ -49,7 +49,7 @@ export default class QueueItem {
     if (this.status === status.stopped)
       return new Error("stopped item cannot be resumed");
 
-    let result = this.onResume();
+    let result = this.toResume();
     if (result == null) this.status = status.playing;
     return result;
   }
@@ -57,7 +57,7 @@ export default class QueueItem {
   stop(): Error {
     if (this.status === status.stopped) return new Error("already stopped");
 
-    let result = this.onStop();
+    let result = this.toStop();
     if (result == null) this.status = status.stopped;
     return result;
   }
@@ -67,16 +67,16 @@ export default class QueueItem {
   }
 
   //should be called by implimenter
-  protected onStart(): Error {
+  protected toStart(): Error {
     return null;
   }
-  protected onPause(): Error {
+  protected toPause(): Error {
     return null;
   }
-  protected onResume(): Error {
+  protected toResume(): Error {
     return null;
   }
-  protected onStop(): Error {
+  protected toStop(): Error {
     return null;
   }
 
