@@ -2,10 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "removeComments": true,
+    "declaration": true,
     "sourceMap": true,
     "preserveConstEnums": true,
     "outDir": "./dist"
   },
-  "include": ["./src/*"],
+  "include": ["./src/"],
   "exclude": ["node_modules"]
 }
