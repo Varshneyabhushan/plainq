@@ -1,5 +1,6 @@
 import { status } from "../src/queueItem";
 import ProgressItem from "./progressItem";
+import { jestPreset } from "ts-jest";
 
 test("completion of item", () => {
   let time = 0;
@@ -48,3 +49,31 @@ test("stopping the item", () => {
   expect(isStopped).toBeTruthy();
   expect(item.progress).toBe(50)
 });
+
+test("pause the item", () => {
+  jest.useFakeTimers();
+
+  let item = new ProgressItem();
+  item.start();
+
+  let checkProgress = val => expect(item.progress).toBe(val)
+
+  jest.advanceTimersByTime(2000)
+  item.pause()
+
+  jest.advanceTimersByTime(1000)
+  checkProgress(20)
+
+  jest.advanceTimersByTime(10000)
+  expect(item.isComplete()).toBeFalsy()
+
+  item.resume()
+  checkProgress(20)
+
+  jest.advanceTimersByTime(3000)
+  checkProgress(50)
+
+  jest.advanceTimersByTime(5000)
+  checkProgress(100)
+  expect(item.isComplete()).toBeTruthy()
+})

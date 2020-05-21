@@ -5,7 +5,7 @@ export default class ProgressItem extends QueueItem {
   progress: number;
   interval: NodeJS.Timeout;
   constructor() {
-    super(false);
+    super();
     this.progress = 0;
   }
 
@@ -21,5 +21,13 @@ export default class ProgressItem extends QueueItem {
   protected toStop(): Error {
     clearInterval(this.interval);
     return null;
+  }
+
+  protected toPause(): Error {
+    return this.toStop()
+  }
+
+  protected toResume(): Error {
+    return this.toStart()
   }
 }
