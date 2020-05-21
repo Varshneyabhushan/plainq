@@ -13,6 +13,7 @@ export default class QueueItem {
 
   private _isComplete: boolean;
   private _markCompleteCallback: Function;
+  private _onStopCallback: Function;
   private pausable: boolean;
 
   constructor(pausable: boolean) {
@@ -54,16 +55,23 @@ export default class QueueItem {
     return result;
   }
 
-  stop(): Error {
+  stop(interrupted?: boolean): Error {
     if (this.status === status.stopped) return new Error("already stopped");
 
     let result = this.toStop();
-    if (result == null) this.status = status.stopped;
+    if (result == null) {
+      this.status = status.stopped;
+      if (this._onStopCallback) this._onStopCallback(interrupted ?? false);
+    }
     return result;
   }
 
   onComplete(callback: Function): void {
     this._markCompleteCallback = callback;
+  }
+
+  onStopped(callback: Function): void {
+    this._onStopCallback = callback;
   }
 
   //should be called by implimenter
