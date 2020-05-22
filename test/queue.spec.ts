@@ -45,24 +45,28 @@ test("pause and resume the queue", () => {
 
   for (let i = 1; i <= itemsCount; i++) queue.addItem(new ProgressItem());
   let err = queue.start();
-  expect(err).toBe(null);
+  expect(err).toBeNull()
   if (err) return;
 
   let advanceOne = () => jest.advanceTimersByTime(10000);
 
   jest.advanceTimersByTime(100);
-  queue.pause()
+  err = queue.pause()
+  expect(err).toBeNull()
   expect(queue.status).toBe(status.paused)
-  queue.resume()
+  err = queue.resume()
+  expect(err).toBeNull()
 
   for (let i = 0; i < itemsCount - 1; i++) {
     let index = queue.currentIndex
     expect(index).toBe(i);
-    queue.pause()
+    err = queue.pause()
+    expect(err).toBeNull()
     advanceOne();
     expect(queue.items[index].status).toBe(status.paused)
     expect(queue.currentIndex).toBe(i);
-    queue.resume()
+    err = queue.resume()
+    expect(err).toBeNull()
     advanceOne()
     expect(queue.items[index].status).toBe(status.complete)
   }
