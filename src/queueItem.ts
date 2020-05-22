@@ -6,7 +6,7 @@ export enum status {
 }
 
 export default class QueueItem {
-  status: status;
+  status = status.stopped;
 
   private _markCompleteCallback: Function;
   private _onStopCallback: Function;
@@ -67,8 +67,8 @@ export default class QueueItem {
     return result;
   }
 
-  onComplete(callback: Function): void {
-    this._markCompleteCallback = callback;
+  onComplete(callback?: Function): void {
+    if (callback) this._markCompleteCallback = callback;
   }
 
   onStopped(callback: Function): void {

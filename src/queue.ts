@@ -26,6 +26,19 @@ export default class Queue {
     });
   }
 
+  removeItem(index: number): Error {
+    if (index >= this.items.length || index < 0)
+      return new Error("index out of range");
+    let item = this.items[index];
+    this.items.splice(index, 1);
+    if (index < this.currentIndex) this.currentIndex -= 1;
+
+    item.onComplete();
+    if (this.status === status.playing) this.start();
+    
+    return null;
+  }
+
   start(): Error {
     let { item, error } = this.seekNextItem();
     if (error || item === null) return error;
