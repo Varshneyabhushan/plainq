@@ -10,7 +10,7 @@ export default class QueueItem {
 
   private _markCompleteCallback: Function;
   private _onStopCallback: Function;
-  private pausable: boolean;
+  pausable: boolean;
 
   constructor(pausable?: boolean) {
     this.pausable = pausable ?? true;

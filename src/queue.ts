@@ -21,7 +21,9 @@ export default class Queue {
 
   addItem(item: QueueItem): void {
     this.items.push(item);
-    item.onComplete(() => this.start());
+    item.onComplete(() => {
+      if (this.status === status.playing) this.start();
+    });
   }
 
   start(): Error {
@@ -34,6 +36,16 @@ export default class Queue {
     return null;
   }
 
+  stop(): Error {
+    let { item, error } = this.seekNextItem();
+    if (error || item === null) return error;
+
+    error = item.stop();
+    if (error) return error;
+    this.status = status.stopped;
+    return null;
+  }
+
   pause(): Error {
     if (this.status !== status.playing)
       return new Error("currently not playing");
@@ -42,8 +54,11 @@ export default class Queue {
     if (error || item === null) return error;
 
     if (item.status !== this.status) return new Error("statuses donot match");
-    let err = item.pause();
-    if (err) return err;
+
+    if (item.pausable) {
+      let err = item.pause();
+      if (err) return err;
+    }
 
     this.status = status.paused;
     return null;
@@ -55,7 +70,7 @@ export default class Queue {
     let { item, error } = this.seekNextItem();
     if (error || item === null) return error;
 
-    let err = item.resume();
+    let err = item.pausable ? item.resume() : item.start();
     if (err) return err;
 
     this.status = status.playing;
