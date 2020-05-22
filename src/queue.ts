@@ -9,6 +9,10 @@ let withError = (message: string): QueueItemWithError => {
   return { item: null, error: new Error(message) };
 };
 
+let isValidIndex = (index: number, length: number): boolean => {
+  return 0 <= index && index <= length - 1;
+};
+
 export default class Queue {
   items: QueueItem[] = [];
   currentIndex: number = 0;
@@ -46,6 +50,30 @@ export default class Queue {
     item.onComplete();
     if (this.status === status.playing) this.start();
 
+    return null;
+  }
+
+  swapItems(i: number, j: number): Error {
+    let length = this.items.length;
+    if (length == 0) return new Error("items are empty");
+
+    if (!isValidIndex(i, length)) return new Error("first index is not valid");
+    if (!isValidIndex(j, length)) return new Error("second index is not valid");
+
+    if (i > j) [i, j] = [j, i];
+
+    let item1 = this.items[i];
+    let item2 = this.items[j];
+
+    let head = this.items.slice(0, i);
+    let middle = this.items.slice(i + 1, j);
+    let tail = this.items.slice(j + 1, this.items.length);
+
+    this.items = head.concat(item2, middle, item1, tail)
+
+    if(this.currentIndex == i) this.currentIndex = j
+    else if(this.currentIndex == j) this.currentIndex = i
+    
     return null;
   }
 
