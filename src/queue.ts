@@ -19,8 +19,18 @@ export default class Queue {
     this.circular = circular ?? false;
   }
 
-  addItem(item: QueueItem): void {
-    this.items.push(item);
+  addItem(item: QueueItem, index?: number): void {
+    if (index >= this.items.length - 1 || index === undefined)
+      this.items.push(item);
+    else {
+      let head = this.items.slice(0, index);
+      let tail = this.items.slice(index, this.items.length);
+      this.items = head.concat(item, tail);
+      if (index <= this.currentIndex) {
+        this.currentIndex += 1;
+      }
+    }
+
     item.onComplete(() => {
       if (this.status === status.playing) this.start();
     });
@@ -35,7 +45,7 @@ export default class Queue {
 
     item.onComplete();
     if (this.status === status.playing) this.start();
-    
+
     return null;
   }
 

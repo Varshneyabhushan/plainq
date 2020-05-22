@@ -2,13 +2,44 @@ import ProgressItem from "./progressItem";
 import Queue from "../src/queue";
 import { status } from "../src/queueItem";
 
-test("adding items", () => {
+test("inserting items at different positions", () => {
   let queue = new Queue(true);
   let itemsCount = 20;
 
   for (let i = 1; i <= itemsCount; i++) queue.addItem(new ProgressItem());
 
   expect(queue.items.length).toBe(itemsCount);
+
+  jest.useFakeTimers();
+  queue.start();
+
+  let pos = 15;
+
+  jest.advanceTimersByTime(pos * 10000);
+  expect(queue.currentIndex).toBe(pos);
+
+  //add newItem after currentIndex
+  let newItem = new ProgressItem();
+  queue.addItem(newItem, pos + 2);
+  expect(queue.currentIndex).toBe(pos);
+  expect(queue.items[pos + 2]).toBe(newItem);
+  expect(queue.items[pos + 3]).not.toBe(newItem);
+
+  //add newItem before currentIndex
+  newItem = new ProgressItem();
+  queue.addItem(newItem, pos - 5);
+  expect(queue.items[pos - 5]).toBe(newItem);
+
+  pos += 1;
+  expect(queue.currentIndex).toBe(pos);
+
+  //add newItem at currentIndex
+  newItem = new ProgressItem();
+  queue.addItem(newItem, pos);
+  expect(queue.items[pos]).toBe(newItem);
+
+  pos += 1;
+  expect(queue.currentIndex).toBe(pos);
 });
 
 test("shifting through items on complete", () => {
