@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 export enum status {
   playing = "playing",
   stopped = "stopped",
@@ -5,22 +7,24 @@ export enum status {
   complete = "complete",
 }
 
-export default class QueueItem {
+export default class QueueItem extends EventEmitter {
   status = status.stopped;
 
-  private _markCompleteCallback: Function;
-  private _onStopCallback: Function;
   pausable: boolean;
 
   constructor(pausable?: boolean) {
+    super()
     this.pausable = pausable ?? true;
+  }
+
+  setStatus(status: status, info?) {
+    this.status = status
+    this.emit(status, info)
   }
 
   start(): Error {
     let result = this.toStart();
-    if (result == null) {
-      this.status = status.playing;
-    }
+    if (result == null) this.setStatus(status.playing)
     return result;
   }
 
@@ -35,7 +39,7 @@ export default class QueueItem {
     if (this.status === status.complete) return new Error("already complete");
 
     let result = this.toPause();
-    if (result == null) this.status = status.paused;
+    if (result == null) this.setStatus(status.paused)
     return result;
   }
 
@@ -50,7 +54,7 @@ export default class QueueItem {
     if (this.status === status.complete) return new Error("already complete");
 
     let result = this.toResume();
-    if (result == null) this.status = status.playing;
+    if (result == null) this.setStatus(status.playing)
     return result;
   }
 
@@ -60,19 +64,8 @@ export default class QueueItem {
     if (this.status === status.complete) return new Error("already complete");
 
     let result = this.toStop(interrupted);
-    if (result == null) {
-      this.status = status.stopped;
-      if (this._onStopCallback) this._onStopCallback(interrupted ?? false);
-    }
+    if (result == null) this.setStatus(status.stopped, interrupted ?? false)
     return result;
-  }
-
-  onComplete(callback?: Function): void {
-    if (callback) this._markCompleteCallback = callback;
-  }
-
-  onStopped(callback: Function): void {
-    this._onStopCallback = callback;
   }
 
   //should be called by implimenter
@@ -90,8 +83,7 @@ export default class QueueItem {
   }
 
   protected markComplete(): void {
-    this.status = status.complete;
-    if (this._markCompleteCallback) return this._markCompleteCallback();
+    this.setStatus(status.complete)
   }
 
   isComplete(): boolean {

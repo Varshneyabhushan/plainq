@@ -30,9 +30,7 @@ export default class Queue {
       }
     }
 
-    item.onComplete(() => {
-      if (this.status === status.playing) this.start();
-    });
+    item.on(status.complete, () => { if(this.status === status.playing) this.start() })
   }
 
   removeItem(index: number): Error {
@@ -41,7 +39,7 @@ export default class Queue {
     this.items.splice(index, 1);
     if (index < this.currentIndex) this.currentIndex -= 1;
 
-    item.onComplete();
+    item.removeAllListeners()
     if (this.status === status.playing) this.start();
 
     return null;

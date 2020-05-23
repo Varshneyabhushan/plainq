@@ -8,7 +8,7 @@ test("start, complete of item", () => {
   let item = new ProgressItem();
   item.start();
 
-  item.onComplete(() => expect(time).toBe(10000));
+  item.on(status.complete, () => expect(time).toBe(10000));
 
   //complete should be false when started
   expect(item.isComplete()).toBeFalsy();
@@ -34,7 +34,7 @@ test("stopping the item", () => {
 
   let isStopped = false;
 
-  item.onStopped((_) => {
+  item.on(status.stopped, () => {
     isStopped = true;
     expect(time).toBe(5000);
     expect(item.status).toBe(status.stopped);
