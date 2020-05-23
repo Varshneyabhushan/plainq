@@ -20,8 +20,7 @@ export default class Queue {
   }
 
   addItem(item: QueueItem, index?: number): void {
-    if (index >= this.items.length - 1 || index === undefined)
-      this.items.push(item);
+    if (!this.isValidIndex(index) || index === undefined) this.items.push(item);
     else {
       let head = this.items.slice(0, index);
       let tail = this.items.slice(index, this.items.length);
@@ -37,8 +36,7 @@ export default class Queue {
   }
 
   removeItem(index: number): Error {
-    if (index >= this.items.length || index < 0)
-      return new Error("index out of range");
+    if (!this.isValidIndex(index)) return new Error("index out of range");
     let item = this.items[index];
     this.items.splice(index, 1);
     if (index < this.currentIndex) this.currentIndex -= 1;
@@ -53,8 +51,8 @@ export default class Queue {
     let length = this.items.length;
     if (length == 0) return new Error("items are empty");
 
-    if (!this.isValidIndex()) return new Error("first index is not valid");
-    if (!this.isValidIndex()) return new Error("second index is not valid");
+    if (!this.isValidIndex(i)) return new Error("first index is not valid");
+    if (!this.isValidIndex(j)) return new Error("second index is not valid");
 
     if (i > j) [i, j] = [j, i];
 
@@ -143,6 +141,7 @@ export default class Queue {
   }
 
   goPrev(): Error {
+    if(this.items.length == 0) return new Error("items are empty") 
     let item = this.items[this.currentIndex];
     item.stop(true);
     let isEnd = this.reverseIndex();
@@ -163,7 +162,6 @@ export default class Queue {
 
     let totalLength = this.items.length;
     if (totalLength === 0) return withError("items are empty");
-    if (!this.isValidIndex()) return withError("index out of range");
 
     for (let i = 0; i <= totalLength; i++) {
       let item = this.items[this.currentIndex];
@@ -172,31 +170,6 @@ export default class Queue {
         if (isEnd) break;
       } else {
         this.status = item.status;
-        return { item, error: null };
-      }
-    }
-
-    this.status = status.complete;
-    return { item: null, error: null };
-  }
-
-  /**
-   * does the same thing as above except it goes reverse
-   */
-  seekPrevItem(): QueueItemWithError {
-    if (this.status === status.complete) return withError("already complete");
-
-    let totalLength = this.items.length;
-    if (totalLength === 0) return withError("items are empty");
-    if (!this.isValidIndex()) return withError("index out of range");
-
-    for (let i = 0; i <= totalLength; i++) {
-      let item = this.items[this.currentIndex];
-      if (item.isComplete()) {
-        let isEnd = this.reverseIndex();
-        if (isEnd) break;
-      } else {
-        this.status = status.complete;
         return { item, error: null };
       }
     }
@@ -231,8 +204,8 @@ export default class Queue {
     return false;
   }
 
-  private isValidIndex(): boolean {
-    let index = this.currentIndex;
+  private isValidIndex(index?: number): boolean {
+    index = index ?? this.currentIndex;
     let length = this.items.length;
     return 0 <= index && index <= length - 1;
   }
