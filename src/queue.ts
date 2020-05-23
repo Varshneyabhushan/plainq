@@ -69,11 +69,11 @@ export default class Queue {
     let middle = this.items.slice(i + 1, j);
     let tail = this.items.slice(j + 1, this.items.length);
 
-    this.items = head.concat(item2, middle, item1, tail)
+    this.items = head.concat(item2, middle, item1, tail);
 
-    if(this.currentIndex == i) this.currentIndex = j
-    else if(this.currentIndex == j) this.currentIndex = i
-    
+    if (this.currentIndex == i) this.currentIndex = j;
+    else if (this.currentIndex == j) this.currentIndex = i;
+
     return null;
   }
 
@@ -126,6 +126,23 @@ export default class Queue {
 
     this.status = status.playing;
     return null;
+  }
+
+  goNext(): Error {
+    if (this.status === status.stopped) return this.start();
+    let item = this.items[this.currentIndex]
+    item.stop(true)
+    item.status = status.complete
+    this.currentIndex += 1
+    if(this.currentIndex == this.items.length) {
+      if(this.circular) this.currentIndex = 0
+      else {
+        this.status = status.complete
+        return null
+      }
+    }
+
+    return this.start()
   }
 
   seekNextItem(): QueueItemWithError {
