@@ -59,7 +59,7 @@ export default class QueueItem {
 
     if (this.status === status.complete) return new Error("already complete");
 
-    let result = this.toStop();
+    let result = this.toStop(interrupted);
     if (result == null) {
       this.status = status.stopped;
       if (this._onStopCallback) this._onStopCallback(interrupted ?? false);
@@ -85,7 +85,7 @@ export default class QueueItem {
   protected toResume(): Error {
     return null;
   }
-  protected toStop(): Error {
+  protected toStop(interrupted: boolean): Error {
     return null;
   }
 
