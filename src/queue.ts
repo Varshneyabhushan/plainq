@@ -209,4 +209,4 @@ export default class Queue {
   }
 }
 
-export { QueueItem }
+export { QueueItem, Queue }
