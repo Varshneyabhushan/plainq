@@ -9,10 +9,6 @@ let withError = (message: string): QueueItemWithError => {
   return { item: null, error: new Error(message) };
 };
 
-let isValidIndex = (index: number, length: number): boolean => {
-  return 0 <= index && index <= length - 1;
-};
-
 export default class Queue {
   items: QueueItem[] = [];
   currentIndex: number = 0;
@@ -57,8 +53,8 @@ export default class Queue {
     let length = this.items.length;
     if (length == 0) return new Error("items are empty");
 
-    if (!isValidIndex(i, length)) return new Error("first index is not valid");
-    if (!isValidIndex(j, length)) return new Error("second index is not valid");
+    if (!this.isValidIndex()) return new Error("first index is not valid");
+    if (!this.isValidIndex()) return new Error("second index is not valid");
 
     if (i > j) [i, j] = [j, i];
 
@@ -128,39 +124,52 @@ export default class Queue {
     return null;
   }
 
+  /**
+   * stops the current Item and starts the queue again ( seeksNextItem and )
+   *
+   */
   goNext(): Error {
     if (this.status === status.stopped) return this.start();
-    let item = this.items[this.currentIndex]
-    item.stop(true)
-    item.status = status.complete
-    this.currentIndex += 1
-    if(this.currentIndex == this.items.length) {
-      if(this.circular) this.currentIndex = 0
-      else {
-        this.status = status.complete
-        return null
-      }
+    let item = this.items[this.currentIndex];
+    item.stop(true);
+    item.status = status.complete;
+    let isEnd = this.advanceIndex();
+    if (isEnd) {
+      this.status = status.complete;
+      return null;
     }
 
-    return this.start()
+    return this.start();
   }
 
+  goPrev(): Error {
+    let item = this.items[this.currentIndex];
+    item.stop(true);
+    let isEnd = this.reverseIndex();
+    if (isEnd) {
+      this.status = status.complete;
+      return null;
+    }
+
+    return this.start();
+  }
+
+  /**
+   * gets the next unComplete item (including the currentIndex), starting from the currentIndex
+   * sets the state of the queue to new unComplete item
+   */
   seekNextItem(): QueueItemWithError {
     if (this.status === status.complete) return withError("already complete");
 
     let totalLength = this.items.length;
     if (totalLength === 0) return withError("items are empty");
-    if (this.currentIndex >= totalLength)
-      return withError("index out of range");
+    if (!this.isValidIndex()) return withError("index out of range");
 
     for (let i = 0; i <= totalLength; i++) {
       let item = this.items[this.currentIndex];
       if (item.isComplete()) {
-        this.currentIndex += 1;
-        if (this.currentIndex === totalLength) {
-          if (this.circular) this.currentIndex = 0;
-          else break;
-        }
+        let isEnd = this.advanceIndex();
+        if (isEnd) break;
       } else {
         this.status = item.status;
         return { item, error: null };
@@ -169,5 +178,62 @@ export default class Queue {
 
     this.status = status.complete;
     return { item: null, error: null };
+  }
+
+  /**
+   * does the same thing as above except it goes reverse
+   */
+  seekPrevItem(): QueueItemWithError {
+    if (this.status === status.complete) return withError("already complete");
+
+    let totalLength = this.items.length;
+    if (totalLength === 0) return withError("items are empty");
+    if (!this.isValidIndex()) return withError("index out of range");
+
+    for (let i = 0; i <= totalLength; i++) {
+      let item = this.items[this.currentIndex];
+      if (item.isComplete()) {
+        let isEnd = this.reverseIndex();
+        if (isEnd) break;
+      } else {
+        this.status = status.complete;
+        return { item, error: null };
+      }
+    }
+
+    this.status = status.complete;
+    return { item: null, error: null };
+  }
+
+  private advanceIndex(): boolean {
+    let totalLength = this.items.length;
+    if (this.currentIndex == totalLength - 1) {
+      if (this.circular) {
+        this.currentIndex = 0;
+        return false;
+      } else {
+        return true;
+      }
+    } else this.currentIndex += 1;
+    return false;
+  }
+
+  private reverseIndex(): boolean {
+    let totalLength = this.items.length;
+    if (this.currentIndex == 0) {
+      if (this.circular) {
+        this.currentIndex = totalLength - 1;
+        return false;
+      } else {
+        return true;
+      }
+    } else this.currentIndex -= 1;
+    return false;
+  }
+
+  private isValidIndex(): boolean {
+    let index = this.currentIndex;
+    let length = this.items.length;
+    return 0 <= index && index <= length - 1;
   }
 }

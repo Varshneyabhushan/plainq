@@ -85,7 +85,7 @@ export default class QueueItem {
   protected toResume(): Error {
     return null;
   }
-  protected toStop(interrupted: boolean): Error {
+  protected toStop(interrupted?: boolean): Error {
     return null;
   }
 
