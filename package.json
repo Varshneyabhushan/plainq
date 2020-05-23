@@ -1,18 +1,21 @@
 {
-  "name": "queuer",
+  "name": "plainq",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/queue.js",
+  "types": "dist/queue.d.ts",
   "scripts": {
     "dev": "tsc --watch",
     "test": "jest",
     "build": "tsc",
-    "coverage" : "jest --coverage"
+    "coverage": "jest --coverage"
   },
   "keywords": [],
-  "author": "",
+  "author": "varshneya",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "events": "^3.1.0"
+  },
   "devDependencies": {
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.4",

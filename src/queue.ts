@@ -208,3 +208,5 @@ export default class Queue {
     return 0 <= index && index <= length - 1;
   }
 }
+
+export { QueueItem }
